@@ -15,23 +15,23 @@ class Help(discord.ext.commands.Cog):
         # embed.add_field(name= "checkout"    , value="Check out"                , inline=True)
         # embed.add_field(name= "order_drink" , value="Create a drink order"                  )
         # embed.add_field(name= "record"      , value="record yor meeting sound"              )
-        text = """:sun_with_face:  `\CHECKIN` :first_quarter_moon_with_face: `\CHECKOUT`
+        text = """:sun_with_face:  `/CHECKIN` :first_quarter_moon_with_face: `\CHECKOUT`
 \t\t-The Check in out function can provide automated registration, login and logout services, and provide detailed login records
 \t\t-Allowing the team to manage and monitor user activities more easily.
 \t\t-Allowing you to manage and monitor user activities more effectively.
-:champagne_glass: \`ORDER DRINK`
+:champagne_glass: `/ORDER DRINK`
 \t\t-You can create a drink order.
 \t\t-Other users can enter what they want to drink.
 \t\t-In the end you will receive all the drinks entered by the user.
-:speaking_head: `\RECORD`
+:speaking_head: `/RECORD`
 \t\t-You can record your meeting sound, and get the summarize of the meeting.
 \t\t-private record       : Start a private recording, and the subsequent summary will only be available to those in the voice room (it is recommended to lock the room)
 \t\t-public record        : Open a public recording, everyone in this server can access.
 \t\t-check record summary : Can check all your accessible recordings, and call up the summary conclusion.
 \t\t-check record file    : Can check all your accessible recordings, and download the audio.
-:office_worker: `\get_checkinout`
+:office_worker: `/get_checkinout`
 \t\t-The team leader can check the team member check in-out record.
-:man_teacher: `\Team`
+:man_teacher: `/Team`
 \t\tYou can create your team, manage your team members, assign tasks, check in and out status.
 \t\t-get checkinout       : The team leader can check the team member check in-out record.
 \t\t-teamwork             : You can use this command to let the robot help you assign tasks to team members.
