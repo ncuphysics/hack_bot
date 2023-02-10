@@ -8,6 +8,17 @@ python-dotenv = "*"
 py-cord = "*"
 pytz = "*"
 requests = "*"
+speechrecognition = "*"
+wheel = "*"
+pydub = "*"
+openai = "*"
+google-api-python-client = "*"
+requests-html = "*"
+beautifulsoup4 = "*"
+yt-dlp = "*"
+pynacl = "*"
+numpy = "*"
+simpleaudio = "*"
 
 [dev-packages]
 
