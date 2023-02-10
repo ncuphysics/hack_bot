@@ -12,8 +12,6 @@ class Team:
         self.is_public = False
         self.need_per  = True
 
-
-
 class ComfirmUserJoin(discord.ui.View):
     def __init__(self, author, team_class, user, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -34,8 +32,6 @@ class ComfirmUserJoin(discord.ui.View):
     async def second_button_callback(self, button, interaction):
         await  self.user.send("Your invitations have been reject")
         await interaction.response.send_message("Reject !!")
-
-
 
 class InviteUser(discord.ui.View):
     def __init__(self, author, team_class, *args, **kwargs) -> None:
@@ -59,12 +55,6 @@ class InviteUser(discord.ui.View):
             self.team_class.member.append(interaction.user)
             self.team_class.member_ids.append(interaction.user.id)
             await interaction.response.send_message("You have joined the team !!",ephemeral=True)
-
-
-        
-
-
-
 
 class CheckUsersInOut():
     def __init__(self, members, User_dict, isfile=True, *args, **kwargs):
@@ -124,17 +114,26 @@ class CheckUsersInOut():
 
 
 
+class DecideVote(discord.ui.Modal):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+
+        self.add_item(discord.ui.InputText(label="Vote Option (each line corresponding to one option)", style=discord.InputTextStyle.long))
 
 
+    async def callback(self, interaction: discord.Interaction):
+        get_word = self.children[0].value.strip()
+        if (len(get_word) == 0):
+            await interaction.response.send_message(content=':white_check_mark: create a poll failed', ephemeral=True)
+            return
 
+        self.options = get_word.split("\n")
 
+        if (len(self.options) <= 1):
+            await interaction.response.send_message(content=':white_check_mark: create a poll failed', ephemeral=True)
+            return
 
-
-
-
-
-
-
+        await interaction.response.send_message(content=':white_check_mark:  You have successfully create a vote', ephemeral=True)
 
 
 

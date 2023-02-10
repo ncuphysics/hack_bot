@@ -5,10 +5,10 @@ from pathlib              import Path
 
 import function.OrderDrink   as my_od # my class
 import function.MusicBot     as my_mb # my class
+import function.weather      as my_wd # my class
 import function.Record       as my_rd # my class
 import function.teams        as my_ts # my class
 import function.User         as my_Us # my class
-import function.weather       as my_wd # my class
 
 import discord
 import pickle
@@ -18,17 +18,17 @@ import os
 
 # pip install py-cord   
 
-testing_guild = [1072497404768694393]
+testing_guild = [1071431018701144165, 597757976920588288]
 client = commands.Bot()
 
+
+connections = {}
+teams_dict  = {}
 User_dict   = {}  ##   {userid : userclass }k
 orders      = {}
 
-
-teams_dict  = {}
-
 PRIVATE_RECORD_FOLDER = "private_recorded"
-PUBLIC_RECORD_FOLDER = "public_recorded"
+PUBLIC_RECORD_FOLDER  = "public_recorded"
 os.makedirs(PRIVATE_RECORD_FOLDER, exist_ok=True)
 os.makedirs(PUBLIC_RECORD_FOLDER , exist_ok=True)
 
@@ -103,7 +103,7 @@ async def public_record(ctx, name: Option(str, "The name of meeting", required =
         await ctx.respond("You aren't in a voice channel!")
         return
     vc = await voice.channel.connect()
-    # connections.update({ctx.guild.id: vc})
+    connections.update({ctx.guild.id: vc})
 
     SRS = my_rd.StopRecordSave(os.path.join(PUBLIC_RECORD_FOLDER,str(ctx.guild.id)),name)
 
@@ -123,7 +123,7 @@ async def private_record(ctx, name: Option(str, "The name of meeting", required 
         await ctx.respond("You aren't in a voice channel!")
         return
     vc = await voice.channel.connect()
-    # connections.update({ctx.guild.id: vc})
+    connections.update({ctx.guild.id: vc})
 
     SRS = my_rd.StopRecordSave(os.path.join(PRIVATE_RECORD_FOLDER,str(ctx.guild.id)), name)
 
@@ -488,19 +488,27 @@ async def get_checkinout_user(ctx,  team_name: Option(str, "The team name", requ
     # await ctx.respond("====== checkin_record ======")
 
 
-# 分派工作
+# 投票
 @client.slash_command(name="vote",description="Assign work to users",guild_ids=testing_guild)
-async def vote(ctx, team_name: Option(str, "The team name", required = True)):  
+async def vote(ctx, team_name: Option(str, "The team name", required = False,default=None)):  
 
+    if (team_name):
+        if (team_name not in teams_dict):
+            await ctx.respond("The team name is not exist.")
+            return
 
-    if (team_name not in teams_dict):
-        await ctx.respond("The team name is not exist.")
-        return
+        if (ctx.author.id not in teams_dict[team_name].leader_ids or ctx.author.id not in teams_dict[team_name].member_ids):
+            await ctx.respond("Your are not the leader")
+            return
+    
 
-    if (ctx.author.id not in teams_dict[team_name].leader_ids or ctx.author.id not in teams_dict[team_name].member_ids):
-        await ctx.respond("Your are not the leader")
-        return
+    # Choose vote
+    my_vote = my_ts.DecideVote(title='Votes')
+    await ctx.user.send_modal(my_vote)
+    # create vote
+    # if (not team_name):
 
+    # else
 
     ## check if user is any team leader
     ## choose each team

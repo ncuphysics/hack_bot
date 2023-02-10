@@ -4,6 +4,6 @@
 https://github.com/BtbN/FFmpeg-Builds/releases
 
 # required module
-'''python
+```python
 pip install py-cord SpeechRecognition pyaudio pydub pyaudio openai google-api-python-client requests_html beautifulsoup4 yt-dlp
-'''
+```

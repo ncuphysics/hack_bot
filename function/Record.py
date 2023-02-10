@@ -12,7 +12,7 @@ import os
 
 INFINITY = 2_147_483_647
 
-openai.api_key = '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' # os.getenv('OPENAI_TOKEN1')
+openai.api_key = '' # os.getenv('OPENAI_TOKEN1')
 
 def prompt_openai(word):
     try:
