@@ -17,18 +17,14 @@ import os
 
 # pip install py-cord   
 
-testing_guild = [597757976920588288, 1071431018701144165]
+testing_guild = [1072497404768694393]
 client = commands.Bot()
 
-
-connections = {}
 User_dict   = {}  ##   {userid : userclass }k
 orders      = {}
 
 
 teams_dict  = {}
-
-music_user  = {}
 
 PRIVATE_RECORD_FOLDER = "private_recorded"
 PUBLIC_RECORD_FOLDER = "public_recorded"
@@ -86,7 +82,7 @@ async def order_drink(ctx,  timeout_min: Option(int, "Time out (min)", required 
     this_order = my_od.OrderDrink(author = ctx.author, timeout=timeout_min*60)
     orders[ctx.author.id] = this_order
 
-    await ctx.response.send_message(f"{ctx.author.mention} :exclamation: You can use a `/stop_order_drink`  command to close the order anytime you want.", ephemeral=True)
+    await ctx.response.send_message(f"{ctx.author.mention} :exclamation: You can use a :stop_button: /stop_order_drink :stop_button:  command to close the order anytime you want.", ephemeral=True)
     await ctx.send(f"@everyone!!  {ctx.author.mention} open a drink order", view=this_order)
 
 ############################################################ Record ############################################################
@@ -105,18 +101,8 @@ async def public_record(ctx, name: Option(str, "The name of meeting", required =
     if not voice:
         await ctx.respond("You aren't in a voice channel!")
         return
-
-    if (ctx.channel.id in music_user):
-        if ctx.guild.voice_client not in client.voice_clients:
-            vc = await voice.channel.connect()
-        else:
-            if (music_user[ctx.channel.id].state == 1):
-                await music_user[ctx.channel.id].pause()
-            vc = music_user[ctx.channel.id].voice
-    else:
-        vc = await voice.channel.connect()
-
-    connections.update({ctx.guild.id: vc})
+    vc = await voice.channel.connect()
+    # connections.update({ctx.guild.id: vc})
 
     SRS = my_rd.StopRecordSave(os.path.join(PUBLIC_RECORD_FOLDER,str(ctx.guild.id)),name)
 
@@ -135,20 +121,8 @@ async def private_record(ctx, name: Option(str, "The name of meeting", required 
     if not voice:
         await ctx.respond("You aren't in a voice channel!")
         return
-    
-    
-    if (ctx.channel.id in music_user):
-        if ctx.guild.voice_client not in client.voice_clients:
-            vc = await voice.channel.connect()
-        else:
-            if (music_user[ctx.channel.id].state == 1):
-                await music_user[ctx.channel.id].pause()
-            vc = music_user[ctx.channel.id].voice
-    else:
-        vc = await voice.channel.connect()
-
-
-    connections.update({ctx.guild.id: vc})
+    vc = await voice.channel.connect()
+    # connections.update({ctx.guild.id: vc})
 
     SRS = my_rd.StopRecordSave(os.path.join(PRIVATE_RECORD_FOLDER,str(ctx.guild.id)), name)
 
@@ -391,16 +365,8 @@ async def loop(ctx):
     if ctx.guild.voice_client not in client.voice_clients:
         await ctx.send("I'm not singing")
         return
+#######################################################################################################################
 
-    if (ctx.channel.id in music_user):
-        if (not music_user[ctx.channel.id].loop):
-            music_user[ctx.channel.id].loop = True
-            await ctx.send("looping right now")
-            if (music_user[ctx.channel.id].state == 0):
-                await music_user[ctx.channel.id].skip()
-        else:
-            music_user[ctx.channel.id].loop = False
-            await ctx.send("disable loop")
 
 ##################################################### Team ############################################################
 
@@ -590,7 +556,11 @@ async def book_meeting(ctx):
 # get weather
 @client.slash_command(name="weather",description="Weather information for each region",guild_ids=testing_guild)
 async def weather(ctx):
-    await ctx.respond("====== weather ======")
+    city_table         = []
+
+    weather_Meun = my_wd.CheckWeatherMenu(city_table)
+
+    await ctx.respond("====== weather ======", view=weather_Meun.view, ephemeral=True)
 
 
 ########################################################################################################################
@@ -598,10 +568,16 @@ async def weather(ctx):
 
 
 @client.slash_command(name="help",description="Shows help for the bot",guild_ids=testing_guild)
-async def help(ctx, func:Option(str, "Which function", required = False, default=None)):
+async def help(ctx):
 
-    if not func:
-        text = """:sun_with_face:  **CHECKIN** :first_quarter_moon_with_face: **CHECKOUT**
+    # embed = discord.Embed( title="Command", description="I'm a bot that could help you to works with your teams")
+
+    # embed.add_field(name= "checkin"     , value="Check in"                 , inline=True)
+    # embed.add_field(name= "checkout"    , value="Check out"                , inline=True)
+    # embed.add_field(name= "order_drink" , value="Create a drink order"                  )
+    # embed.add_field(name= "record"      , value="record yor meeting sound"              )
+
+    text = """:sun_with_face:  **CHECKIN** :first_quarter_moon_with_face: **CHECKOUT**
 \t\t-The Check in out function can provide automated registration, login and logout services, and provide detailed login records
 \t\t-Allowing the team to manage and monitor user activities more easily.
 \t\t-Allowing you to manage and monitor user activities more effectively.
@@ -631,14 +607,9 @@ async def help(ctx, func:Option(str, "Which function", required = False, default
 
 
 """
-        await ctx.send(text)
-    else:
-        pass
+    await ctx.send(text)
 
 
 # client.run(os.getenv('DISCORD_TOKEN'))
 
-client.run('MTA3MTQ0MzU3NjgwMzgxOTUyMA.GIGeLk.yqK_wk1qXYQ6teB5RtSIRJQadhh1L1IiRRwadg')
-
-
-
+client.run('')
