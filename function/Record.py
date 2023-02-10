@@ -1,7 +1,9 @@
 from pydub.playback import play
 from pydub.silence  import split_on_silence, detect_nonsilent
 from datetime       import datetime
+from dotenv         import load_dotenv
 from pydub          import AudioSegment
+
 
 import speech_recognition as sr
 import discord
@@ -10,9 +12,11 @@ import numpy              as np
 import glob
 import os
 
+load_dotenv()
+
 INFINITY = 2_147_483_647
 
-openai.api_key = '' # os.getenv('OPENAI_TOKEN1')
+openai.api_key = os.getenv('OPENAI')
 
 def prompt_openai(word):
     try:
@@ -51,7 +55,8 @@ def create_prompt(all_result, all_time, recorded_users):
 
 
 class StopRecordSave():
-    def __init__(self,savefolder,name=None):
+    def __init__(self,savefolder,name=None, client=None):
+        self.client = client
         self.savefolder  = savefolder
         self.start_time = datetime.now().strftime('%y-%m-%d-%H-%M-%S')
         self.name = name
@@ -61,7 +66,7 @@ class StopRecordSave():
 
     async def once_done(self, sink: discord.sinks, channel: discord.TextChannel, *args):
         recorded_users = [  # A list of recorded users
-            f"<@{user_id}>"
+            (await self.client.fetch_user(user_id)).name
             for user_id, audio in sink.audio_data.items()
         ]
         # for user_id, audio in sink.audio_data.items():
@@ -186,8 +191,8 @@ def speech_to_text(path):
     return whole_text, time_text
 
 class CheckRecordMenu():
-    def __init__(self, time_arr, folder_arr, isfile=True, *args, **kwargs):
-
+    def __init__(self, time_arr, folder_arr, isfile=True, client=None, *args, **kwargs):
+        self.client = client
         self.label_arr, discrip_arr, emoji_arr =  self.get_record_time(time_arr, folder_arr)
 
         options = [ discord.SelectOption(label=self.label_arr[i],description=discrip_arr[i],emoji = emoji_arr[i])for i in range(len(time_arr))]
@@ -260,7 +265,7 @@ class CheckRecordMenu():
         user_id_arr    = []
         for all_wav in all_wav_files:
             this_file = os.path.basename(all_wav)[:-4]
-            recorded_users.append(f'<@{this_file}>')
+            recorded_users.append((await self.client.fetch_user(this_file)).name)
             user_id_arr.append(this_file)
             await interaction.channel.send(f'<@{this_file}>', file=discord.File(all_wav))
 
@@ -279,7 +284,7 @@ class CheckRecordMenu():
         user_id_arr    = []
         for all_wav in all_wav_files:
             this_file = os.path.basename(all_wav)[:-4]
-            recorded_users.append(f'<@{this_file}>')
+            recorded_users.append((await self.client.fetch_user(this_file)).name)
             user_id_arr.append(this_file)
             # await interaction.channel.send(f'<@{this_file}>', file=discord.File(all_wav))
 
@@ -295,10 +300,11 @@ class CheckRecordMenu():
             for user_id, this_file in zip(user_id_arr,all_wav_files):  
                 result, timeline = speech_to_text(this_file)
                 print(user_id,":",result)
-                print(user_id,":",result)
 
                 all_result.append(result)
                 all_time.append(timeline)
+
+            await interaction.response.defer()
 
             openai_prompt     = create_prompt(all_result, all_time, recorded_users)
             conclusion_result = prompt_openai(openai_prompt)
@@ -307,7 +313,7 @@ class CheckRecordMenu():
             with open(this_file,'w') as f:
                 f.write(conclusion_result)
 
-            await interaction.response.send_message(conclusion_result, ephemeral=True)
+            await interaction.followup.send(conclusion_result, ephemeral=True)
         else:
 
             with open(conclusion_result_file,'r') as f:

@@ -2,6 +2,10 @@ from discord.commands     import Option
 from discord.ext          import commands
 from datetime             import datetime
 from pathlib              import Path
+from dotenv               import load_dotenv
+
+
+
 
 import function.OrderDrink   as my_od # my class
 import function.MusicBot     as my_mb # my class
@@ -16,13 +20,15 @@ import time
 import glob
 import os
 
-# pip install py-cord   
+
+load_dotenv()  
 
 testing_guild = [1071431018701144165, 597757976920588288]
 client = commands.Bot()
 
 
 connections = {}
+music_user  = {}
 teams_dict  = {}
 User_dict   = {}  ##   {userid : userclass }k
 orders      = {}
@@ -105,7 +111,7 @@ async def public_record(ctx, name: Option(str, "The name of meeting", required =
     vc = await voice.channel.connect()
     connections.update({ctx.guild.id: vc})
 
-    SRS = my_rd.StopRecordSave(os.path.join(PUBLIC_RECORD_FOLDER,str(ctx.guild.id)),name)
+    SRS = my_rd.StopRecordSave(os.path.join(PUBLIC_RECORD_FOLDER,str(ctx.guild.id)),name, client)
 
     vc.start_recording(
         discord.sinks.WaveSink(),  # The sink type to use.
@@ -122,10 +128,11 @@ async def private_record(ctx, name: Option(str, "The name of meeting", required 
     if not voice:
         await ctx.respond("You aren't in a voice channel!")
         return
+
     vc = await voice.channel.connect()
     connections.update({ctx.guild.id: vc})
 
-    SRS = my_rd.StopRecordSave(os.path.join(PRIVATE_RECORD_FOLDER,str(ctx.guild.id)), name)
+    SRS = my_rd.StopRecordSave(os.path.join(PRIVATE_RECORD_FOLDER,str(ctx.guild.id)), name, client)
 
     vc.start_recording(
         discord.sinks.WaveSink(),  # The sink type to use.
@@ -167,7 +174,7 @@ async def check_record_summary(ctx):
         await ctx.respond("you haven't recorded any audio")
         return
 
-    CRM = my_rd.CheckRecordMenu(availble_time, corresponding_folders,False)
+    CRM = my_rd.CheckRecordMenu(availble_time, corresponding_folders,False, client)
     
 
     await ctx.respond("Choose a record!   🟢:Public    🔴:Private", view=CRM.view, ephemeral=True)
@@ -204,7 +211,7 @@ async def check_record_file(ctx):
         await ctx.respond("you haven't recorded any audio")
         return
 
-    CRM = my_rd.CheckRecordMenu(availble_time, corresponding_folders)
+    CRM = my_rd.CheckRecordMenu(availble_time, corresponding_folders,True, client)
     
 
     await ctx.respond("Choose a record!   🟢:Public    🔴:Private", view=CRM.view, ephemeral=True)
@@ -214,6 +221,7 @@ async def check_record_file(ctx):
 
 @client.slash_command(name="pause",description="Pause the music",guild_ids=testing_guild)
 async def pause(ctx):
+    ctx.respond("ok")
     voice = ctx.author.voice
     if not voice:
         await ctx.respond("You aren't in a voice channel!")
@@ -321,6 +329,7 @@ async def clear(ctx):
         return
     else:
         channel = ctx.author.voice.channel
+
     if ctx.guild.voice_client not in client.voice_clients:
         await ctx.send("I'm not singing")
         return
@@ -366,6 +375,18 @@ async def loop(ctx):
     if ctx.guild.voice_client not in client.voice_clients:
         await ctx.send("I'm not singing")
         return
+
+    if (ctx.channel.id in music_user):
+        if (not music_user[ctx.channel.id].loop):
+            music_user[ctx.channel.id].loop = True
+            await ctx.send("looping right now")
+            if (music_user[ctx.channel.id].state == 0):
+                await music_user[ctx.channel.id].skip()
+        else:
+            music_user[ctx.channel.id].loop = False
+            await ctx.send("disable loop")
+
+
 #######################################################################################################################
 
 
@@ -489,31 +510,15 @@ async def get_checkinout_user(ctx,  team_name: Option(str, "The team name", requ
 
 
 # 投票
-@client.slash_command(name="vote",description="Assign work to users",guild_ids=testing_guild)
-async def vote(ctx, team_name: Option(str, "The team name", required = False,default=None)):  
-
-    if (team_name):
-        if (team_name not in teams_dict):
-            await ctx.respond("The team name is not exist.")
-            return
-
-        if (ctx.author.id not in teams_dict[team_name].leader_ids or ctx.author.id not in teams_dict[team_name].member_ids):
-            await ctx.respond("Your are not the leader")
-            return
-    
-
+@client.slash_command(name="vote",description="Create a vote",guild_ids=testing_guild)
+async def vote(ctx, timeout_min : Option(int, "Time out (min)", required = False, default = 5)):
     # Choose vote
-    my_vote = my_ts.DecideVote(title='Votes')
-    await ctx.user.send_modal(my_vote)
-    # create vote
-    # if (not team_name):
+    my_vote = my_ts.DecideVote(ctx.channel, timeout_min, title='Votes')
+    await ctx.response.send_modal(my_vote)
+    
+    # print(my_vote.options)
 
-    # else
-
-    ## check if user is any team leader
-    ## choose each team
-
-    await ctx.respond("====== vote ======")
+    # await ctx.respond("====== vote ======")
 
 
 # 問團隊隊員現在的任務
@@ -617,6 +622,6 @@ async def help(ctx):
     await ctx.send(text)
 
 
-# client.run(os.getenv('DISCORD_TOKEN'))
+client.run(os.getenv('DISCORD_TOKEN'))
 
-client.run('')
+# client.run(os.)

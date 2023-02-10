@@ -221,7 +221,7 @@ class MusicBot:
                 await self.clear()
             else:
                 print("[*] ===  pause ===   ",self.channelid)
-                self.wait_msg = await self.ctx.channel.send(f':poop: Music stop, type !pause to continue the music  :poop:')
+                self.wait_msg = await self.ctx.channel.send(f':poop: Music stop, type `/pause` or `/play` to continue the music  :poop:')
                 self.state = 2
                 self.voice.pause()
         elif (self.state==2) :
