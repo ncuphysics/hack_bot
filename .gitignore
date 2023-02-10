@@ -1,2 +1,5 @@
 .env
 .DS_Store
+/data/private_recorded/
+/data/public_recorded/
+/data/music/

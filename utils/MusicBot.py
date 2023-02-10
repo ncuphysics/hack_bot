@@ -14,7 +14,7 @@ class MusicBot:
         self.live      = True       # Kill this Musicbot if self.live = False
         self.channel   = channel    # Voice channel
         self.channelid = channel.id # This Music serves channel Id
-        self.floder    = "music"    # Folder to store music
+        self.floder    = "data/music"    # Folder to store music
         self.ctx       = ctx        # ctx
         self.voice     = voice      # voice client
         self.client    = client
