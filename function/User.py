@@ -11,7 +11,6 @@ class User:
         self.__check_ou_record = []  # private
 
     async def checkout(self):
-
         ## forget check in
         if (len(self.check_stack)==0) :
             await self.user_ctx.send("No check in record!!")
@@ -26,7 +25,6 @@ class User:
             return True
             
     async def checkin(self):
-
         ## forget check out
         if (len(self.check_stack)==1) :
             last_time = self.check_stack.pop() 
@@ -45,7 +43,7 @@ class User:
     def get_user_check_in_record(self):
         return self.__check_in_record
 
-    def get_user_check_in_record(self):
+    def get_user_check_ou_record(self):
         return self.__check_out_record
 
 
