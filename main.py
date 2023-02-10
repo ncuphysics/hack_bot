@@ -3,7 +3,6 @@ import dotenv
 import os
 from traceback import format_exception
 
-
 dotenv.load_dotenv()
 token = str(os.getenv("TOKEN"))
 # import asyncio
