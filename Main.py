@@ -8,6 +8,7 @@ import function.MusicBot     as my_mb # my class
 import function.Record       as my_rd # my class
 import function.teams        as my_ts # my class
 import function.User         as my_Us # my class
+import function.weather       as my_wd # my class
 
 import discord
 import pickle
@@ -548,9 +549,7 @@ async def book_meeting(ctx):
 @client.slash_command(name="weather",description="Weather information for each region",guild_ids=testing_guild)
 async def weather(ctx):
     city_table         = []
-
     weather_Meun = my_wd.CheckWeatherMenu(city_table)
-
     await ctx.respond("====== weather ======", view=weather_Meun.view, ephemeral=True)
 
 
