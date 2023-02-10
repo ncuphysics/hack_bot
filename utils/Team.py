@@ -221,9 +221,6 @@ class Alarm:
             return True
         return False
 
-
-
-
 class KickMember:
     def __init__(self, members, teamname):
         self.members      = members
@@ -256,16 +253,6 @@ class KickMember:
         self.members_ids.pop(which_chosen)
 
         await interaction.response.send(f"{self.select.values[0]} has been removed.")
-
-
-
-
-
-
-
-
-
-
 
 
 class CheckAllTeam:
