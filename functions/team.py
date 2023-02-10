@@ -102,6 +102,50 @@ class Team_manage(discord.ext.commands.Cog):
         embed.add_field(name='Check in' , value=checkin_txt ,inline=True)
         embed.add_field(name='Check out', value=checkout_txt,inline=True)
         await ctx.respond(embed=embed, ephemeral=True)
+    
+    @slash_command(name="teamkick",description="kick a member off the team")
+    async def teamkick(self, ctx, team_name: Option(str, "The team name", required = True)):
+
+        if (team_name not in teams_dict):
+            await ctx.respond("The team name is not exist.")
+            return
+
+        if (ctx.author.id not in teams_dict[team_name].leader_ids):
+            await ctx.respond("Your are not the leader")
+            return
+        KM = my_ts.KickMember(teams_dict[team_name].member, team_name)
+        await ctx.respond("====== teamkick ======", view =KM.view, ephemeral=True)
+
+    @slash_command(name="quit",description="Quit a team")
+    async def quit(self, ctx, team_name: Option(str, "The team name", required = True)):
+        if (team_name not in teams_dict):
+            await ctx.respond("The team name is not exist.")
+            return
+
+        if (ctx.author.id not in teams_dict[team_name].member_ids):
+            await ctx.respond("Your are not in the team")
+            return
+
+        teams_dict[team_name].member.remove(ctx.author)
+        teams_dict[team_name].member_ids.remove(ctx.author.id)
+
+        await ctx.respond("Sucessful to quit "+team_name)
+
+    @slash_command(name="showteams",description="Show all public team")
+    async def ShowTeams(self, ctx):
+        availble_name = []
+        for name,i in teams_dict.items():
+            if (i.is_public):
+                availble_name.append(name)
+                print(name)
+
+        if (len(availble_name)==0):
+            await ctx.respond("No public teams")
+            return
+
+        CAT = my_ts.CheckAllTeam(availble_name, teams_dict)
+
+        await ctx.respond("All public teams",view=CAT.view)
 
 def setup(bot):
     bot.add_cog(Team_manage(bot))
