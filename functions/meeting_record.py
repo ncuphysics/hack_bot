@@ -25,7 +25,7 @@ class Record(discord.ext.commands.Cog):
         vc = await voice.channel.connect()
         connections.update({ctx.guild.id: vc})
 
-        SRS = my_rd.StopRecordSave(os.path.join(PUBLIC_RECORD_FOLDER,str(ctx.guild.id)),name, self)
+        SRS = my_rd.StopRecordSave(os.path.join(PUBLIC_RECORD_FOLDER,str(ctx.guild.id)),name, self.bot)
 
         vc.start_recording(
             discord.sinks.WaveSink(),  # The sink type to use.
@@ -46,7 +46,7 @@ class Record(discord.ext.commands.Cog):
         vc = await voice.channel.connect()
         connections.update({ctx.guild.id: vc})
 
-        SRS = my_rd.StopRecordSave(os.path.join(PRIVATE_RECORD_FOLDER,str(ctx.guild.id)), name, self)
+        SRS = my_rd.StopRecordSave(os.path.join(PRIVATE_RECORD_FOLDER,str(ctx.guild.id)), name, self.bot)
 
         vc.start_recording(
             discord.sinks.WaveSink(),  # The sink type to use.
@@ -88,7 +88,7 @@ class Record(discord.ext.commands.Cog):
             await ctx.respond("you haven't recorded any audio")
             return
 
-        CRM = my_rd.CheckRecordMenu(availble_time, corresponding_folders,False, self)
+        CRM = my_rd.CheckRecordMenu(availble_time, corresponding_folders,False, self.bot)
         
 
         await ctx.respond("Choose a record!   🟢:Public    🔴:Private", view=CRM.view, ephemeral=True)
@@ -125,7 +125,7 @@ class Record(discord.ext.commands.Cog):
             await ctx.respond("you haven't recorded any audio")
             return
 
-        CRM = my_rd.CheckRecordMenu(availble_time, corresponding_folders,True, self)
+        CRM = my_rd.CheckRecordMenu(availble_time, corresponding_folders,True, self.bot)
         
 
         await ctx.respond("Choose a record!   🟢:Public    🔴:Private", view=CRM.view, ephemeral=True)

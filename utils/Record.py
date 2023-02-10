@@ -1,7 +1,7 @@
 from pydub.playback import play
 from pydub.silence  import split_on_silence, detect_nonsilent
 from datetime       import datetime
-from dotenv         import load_dotenv
+import dotenv
 from pydub          import AudioSegment
 
 
@@ -12,11 +12,9 @@ import numpy              as np
 import glob
 import os
 
-load_dotenv()
 
 INFINITY = 2_147_483_647
-
-openai.api_key = os.getenv('OPENAI')
+openai.api_key = str(os.getenv('OPENAI_TOKEN'))
 
 def prompt_openai(word):
     try:
