@@ -1,7 +1,9 @@
-# github_practice
+# hack discrod bot
 
-    pip install py-cord
-    pip install SpeechRecognition
-    pip install pyaudio 
-    pip install pydub
-    pip install openai
+# ffmpeg
+https://github.com/BtbN/FFmpeg-Builds/releases
+
+# required module
+'''python
+pip install py-cord SpeechRecognition pyaudio pydub pyaudio openai google-api-python-client requests_html beautifulsoup4 yt-dlp
+'''
