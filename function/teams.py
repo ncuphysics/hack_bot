@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 import discord
 
 class Team:
@@ -108,9 +111,6 @@ class CheckUsersInOut():
 
         await interaction.response.send_message(embed=embed)
 
-
-
-
 class VoteSection(discord.ui.View):
     def __init__(self, options, channel,*args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -164,7 +164,6 @@ class VoteSection(discord.ui.View):
         # self.all_vote[which_chosen] = self.all_vote[which_chosen] + 1 
         # self.vote_dict
 
-
 class DecideVote(discord.ui.Modal):
     def __init__(self, channel, timeout_min ,*args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
@@ -192,8 +191,125 @@ class DecideVote(discord.ui.Modal):
 
         # await interaction.response.send_message(content=':white_check_mark:  You have successfully create a vote', ephemeral=True)
 
+class AnoyOpion(discord.ui.Modal):
+    def __init__(self, leader ,*args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.leader = leader
+        self.add_item(discord.ui.InputText(label="Say anythings", style=discord.InputTextStyle.long))
+
+    async def callback(self, interaction):
+        get_word = self.children[0].value.strip()
+        for each_leader in self.leader:
+            await each_leader.send("From anonymous opinion:\n"+get_word)
+
+        await interaction.response.send_message(content='Successful', ephemeral=True)
+
+
+class Alarm:
+    def __init__(self,member, ontime, text):
+        self.member = member
+        self.ontime = ontime
+        self.text   = text
+    async def check(self):
+        today = datetime.now()
+
+        today_mdh = today.month, today.day, today.hour
+
+        if (today_mdh == self.ontime ):
+            for each in self.member:
+                await each.send(f"{today_mdh[0]}-{today_mdh[1]} {today_mdh[2]}  : {self.text} !!")
+            return True
+        return False
 
 
 
 
+class KickMember:
+    def __init__(self, members, teamname):
+        self.members      = members
+        self.member_name  = [ self.members[i].name for i in range(len(self.members))]
+        self.member_name2 = [ self.members[i].name for i in range(len(self.members))]
+        self.teamname     = teamname
+        options = [ discord.SelectOption(label=self.member_name[i])for i in range(len(self.members))]
+
+        self.select = discord.ui.Select(
+            placeholder = "All team member",
+            min_values  = 1, 
+            max_values  = 1,
+            options = options
+            )
+        self.select.callback = self.callback
+
+        self.view = discord.ui.View()
+        self.view.add_item(self.select)
+
+    async def callback(self, interaction):
+        if (self.select.values[0] not in self.member_name2):
+            await interaction.response.send(f"{self.select.values[0]} has long been removed.")
+            return
+        which_chosen = self.member_name.index()
+        self.options.pop(which_chosen)
+        self.member_name2.remove(self.select.values[0] )
+
+        await self.members[which_chosen].send(f'You were removed from {self.teamname}.')
+        self.members.pop(which_chosen)
+        self.members_ids.pop(which_chosen)
+
+        await interaction.response.send(f"{self.select.values[0]} has been removed.")
+
+
+
+
+
+
+
+
+
+
+
+
+class CheckAllTeam:
+    def __init__(self, name, team_dict):
+        self.team_dict = team_dict
+
+        options = [ discord.SelectOption(label=name[i])for i in range(len(name))]
+
+        self.select = discord.ui.Select(
+            placeholder = "All public team",
+            min_values  = 1, 
+            max_values  = 1,
+            options = options
+            )
+
+
+        self.select.callback = self.callback
+        self.name = name
+        self.view = discord.ui.View()
+        self.view.add_item(self.select)
+
+    async def callback(self,interaction):
+        which_chosen = self.name.index(self.select.values[0])
+
+        # if (not team_dict[self.select.values[0]].need_per):
+        #     self.team_dict.member.append(interaction.user)
+        #     await interaction.response.send(f"You joined {self.select.values[0]} successfully")
+        #     return 
+
+        # else:
+
+        #     await interaction.response.send(f"You joined {self.select.values[0]} successfully")
+
+
+
+        leader_ctx = self.team_dict[self.select.values[0]].leader[-1]
+        team_class = self.team_dict[self.select.values[0]]
+
+        if (team_class.need_per):
+            comfirm_button = ComfirmUserJoin(leader_ctx , team_class, interaction.user)
+            await leader_ctx.send(f"User {interaction.user.name} wants to join you team", view=comfirm_button)
+            await interaction.response.send_message("Has sent invitations for you",ephemeral=True)
+        else:
+            team_class.member.append(interaction.user)
+            team_class.member_ids.append(interaction.user.id)
+            await interaction.response.send_message("You have joined the team !!",ephemeral=True)
 

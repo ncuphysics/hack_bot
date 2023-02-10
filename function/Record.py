@@ -71,7 +71,7 @@ class StopRecordSave():
         ]
         # for user_id, audio in sink.audio_data.items():
     
-        # await sink.vc.disconnect()
+        await sink.vc.disconnect()
 
 
         end_time = datetime.now().strftime('%y-%m-%d-%H-%M-%S')

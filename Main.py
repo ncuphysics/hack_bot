@@ -12,9 +12,12 @@ import function.MusicBot     as my_mb # my class
 import function.weather      as my_wd # my class
 import function.Record       as my_rd # my class
 import function.teams        as my_ts # my class
+import function.Help         as my_Hp # my class
 import function.User         as my_Us # my class
 
+import threading
 import discord
+import asyncio
 import pickle
 import time
 import glob
@@ -32,6 +35,9 @@ music_user  = {}
 teams_dict  = {}
 User_dict   = {}  ##   {userid : userclass }k
 orders      = {}
+
+alarm_arr   = []
+
 
 PRIVATE_RECORD_FOLDER = "private_recorded"
 PUBLIC_RECORD_FOLDER  = "public_recorded"
@@ -447,6 +453,7 @@ async def invite_button(ctx,  team_name: Option(str, "The team name", required =
         await ctx.respond("Your are not the leader")
         return
     else:
+        await ctx.send(f"Team {team_name} is hiring, press the button to try to join")
         Invite_bottun = my_ts.InviteUser(ctx.author, teams_dict[team_name])
         await ctx.respond(view=Invite_bottun)
 
@@ -515,51 +522,138 @@ async def vote(ctx, timeout_min : Option(int, "Time out (min)", required = False
     # Choose vote
     my_vote = my_ts.DecideVote(ctx.channel, timeout_min, title='Votes')
     await ctx.response.send_modal(my_vote)
-    
-    # print(my_vote.options)
-
-    # await ctx.respond("====== vote ======")
 
 
-# 問團隊隊員現在的任務
-@client.slash_command(name="broadcast",description="Ask the team members about their current tasks",guild_ids=testing_guild)
-async def broadcast(ctx, team_name: Option(str, "The team name", required = True)):
+# 廣播
+@client.slash_command(name="broadcast",description="A broadcast to all team member",guild_ids=testing_guild)
+async def broadcast(ctx, team_name: Option(str, "The team name", required = True), text:Option(str, "content", required = True)):
 
+    if (team_name not in teams_dict):
+        await ctx.respond("The team name is not exist.")
+        return
+
+    if (ctx.author.id not in teams_dict[team_name].leader_ids):
+        await ctx.respond("Your are not the leader")
+        return
+
+    for each_member in teams_dict[team_name].member:
+        await each_member.send(f"{team_name} team leader {ctx.author.name} :{text}")
     ## check if user is any team leader
     ## choose each team
 
-    await ctx.respond("====== broadcast ======")
+    await ctx.respond("Broadcast success !",ephemeral=True)
 
 
 @client.slash_command(name="teamkick",description="kick a member off the team",guild_ids=testing_guild)
-async def teamkick(ctx):
+async def teamkick(ctx, team_name: Option(str, "The team name", required = True)):
 
-    ## check if user is any team leader
-    ## choose each team
+    if (team_name not in teams_dict):
+        await ctx.respond("The team name is not exist.")
+        return
 
-    await ctx.respond("====== teamkick ======")
+    if (ctx.author.id not in teams_dict[team_name].leader_ids):
+        await ctx.respond("Your are not the leader")
+        return
+    KM = my_ts.KickMember(teams_dict[team_name].member, team_name)
+    await ctx.respond("====== teamkick ======", view =KM.view, ephemeral=True)
 
 
 
 # 匿名回覆意見
 @client.slash_command(name="anonymous_opinion",description="Allow members to comments anonymously",guild_ids=testing_guild)
-async def anonymous_opinion(ctx):
-    ctx.author.se
+async def anonymous_opinion(ctx, team_name: Option(str, "The team name", required = True)):
+    if (team_name not in teams_dict):
+        await ctx.respond("The team name is not exist.")
+        return
+
+    if (ctx.author.id not in teams_dict[team_name].member_ids):
+        await ctx.respond("Your are not in the team")
+        return
+
+    AO = my_ts.AnoyOpion(teams_dict[team_name].leader, title="Say your opinion.")
     ## check if user in any team
 
-    await ctx.respond("====== anonymousopinion ======")
+    await ctx.response.send_modal(AO)
+
+@client.slash_command(name="quit",description="Quit a team",guild_ids=testing_guild)
+async def quit(ctx, team_name: Option(str, "The team name", required = True)):
+    if (team_name not in teams_dict):
+        await ctx.respond("The team name is not exist.")
+        return
+
+    if (ctx.author.id not in teams_dict[team_name].member_ids):
+        await ctx.respond("Your are not in the team")
+        return
+
+    teams_dict[team_name].member.remove(ctx.author)
+    teams_dict[team_name].member_ids.remove(ctx.author.id)
+
+    await ctx.respond("Sucessful to quit "+team_name)
 
 
-# 訂會議室
-@client.slash_command(name="book_meeting",description="Let user book a meeting",guild_ids=testing_guild)
-async def book_meeting(ctx):
-    
+
+@client.slash_command(name="showteams",description="Show all public team",guild_ids=testing_guild)
+async def ShowTeams(ctx):
+    availble_name = []
+    for name,i in teams_dict.items():
+        if (i.is_public):
+            availble_name.append(name)
+            print(name)
+
+    if (len(availble_name)==0):
+        await ctx.respond("No public teams")
+        return
+
+    CAT = my_ts.CheckAllTeam(availble_name, teams_dict)
+
+    await ctx.respond("All public teams",view=CAT.view)
+
+
+# 約定會議時間
+@client.slash_command(name="team_alarm",description="Book a alram and let me notify everyone in the team",guild_ids=testing_guild)
+async def team_alarm(ctx,
+                    team_name : Option(str, "The team name"  , required = True),
+                    month     : Option(int,"month"           , required = True),
+                    day       : Option(int,"day"             , required = True),
+                    hour      : Option(int,"hour"            , required = True),
+                    text      : Option(str, "text to notify" , required = True)):
+
+    one_time = (month, day, hour)
+    allmem   = teams_dict[team_name].member +  teams_dict[team_name].leader
+    alarm_arr.append( my_ts.Alarm(allmem , one_time, text) )
+
     ## check if user is a team leader, set a alarm to user
 
+    await ctx.respond(f" BookMeeting at {month}-{day} {hour}",ephemeral=True)
+
+async def loop_alarm():
+    while True:
+        result = False
+        for each in range(len(alarm_arr)):
+            result = await alarm_arr[each].check()
+            if (result):
+                alarm_arr.pop(each)
+                break
+        if (not result):
+            await asyncio.sleep(10)
 
 
-    await ctx.respond("====== BookMeeting ======")
+@client.slash_command(name="joke",description="Talk a joke",guild_ids=testing_guild)
+async def joke(ctx):
+    await ctx.respond("Let me think ...")
+    await ctx.send( my_rd.prompt_openai('Q:請你說個笑話\nA:'))
 
+
+@client.slash_command(name="chickensoul",description="Chicken Soup for the Soul",guild_ids=testing_guild)
+async def ChickenSoul(ctx):
+    await ctx.respond("Let me think ...")
+    await ctx.send( my_rd.prompt_openai('Q:請你說個一句心靈雞湯\nA:'))
+
+
+@client.slash_command(name="ask",description="Ask me anything",guild_ids=testing_guild)
+async def ask(ctx,  text      : Option(str, "Question" , required = True)):
+    await ctx.respond("Let me think ...")
+    await ctx.send( my_rd.prompt_openai(f'你是心靈捕手,一個團隊協作的AI,同時也是我們的私人秘書。\nQ:{text}\nA:'))
 
 #######################################################################################################################
 
@@ -616,12 +710,13 @@ async def help(ctx):
 \t\t-member current tasks : Do you find it troublesome to private message each team member? Let the robot help you ask, and I can help you ask every member under you.
 \t\t-teamkick             : Remove member.
 \t\t-anonymous_opinion    : Each member has the ability to express their opinions anonymously, which makes a team grow.
+""" 
+
+    await ctx.respond(view=my_Hp.HelpSelection().view)
 
 
-"""
-    await ctx.send(text)
 
-
+asyncio.get_event_loop().create_task(loop_alarm())
 client.run(os.getenv('DISCORD_TOKEN'))
 
 # client.run(os.)
