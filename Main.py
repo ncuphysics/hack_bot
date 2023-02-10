@@ -115,7 +115,19 @@ async def public_record(ctx, name: Option(str, "The name of meeting", required =
     if not voice:
         await ctx.respond("You aren't in a voice channel!")
         return
-    vc = await voice.channel.connect()
+
+    
+    if ctx.guild.voice_client in client.voice_clients: # if in
+        if (ctx.channel.id in music_user):
+            if (music_user[ctx.channel.id].state == 1):
+                await music_user[ctx.channel.id].pause()
+            vc = music_user[ctx.channel.id].voice
+        else:
+            await voice.channel.voice.disconnect()
+            vc = await voice.channel.connect()
+    else:
+        vc = await voice.channel.connect()
+
     connections.update({ctx.guild.id: vc})
 
     SRS = my_rd.StopRecordSave(os.path.join(PUBLIC_RECORD_FOLDER,str(ctx.guild.id)),name, client)
@@ -136,7 +148,17 @@ async def private_record(ctx, name: Option(str, "The name of meeting", required 
         await ctx.respond("You aren't in a voice channel!")
         return
 
-    vc = await voice.channel.connect()
+    if ctx.guild.voice_client in client.voice_clients: # if in
+        if (ctx.channel.id in music_user):
+            if (music_user[ctx.channel.id].state == 1):
+                await music_user[ctx.channel.id].pause()
+            vc = music_user[ctx.channel.id].voice
+        else:
+            await voice.channel.voice.disconnect()
+            vc = await voice.channel.connect()
+    else:
+        vc = await voice.channel.connect()
+
     connections.update({ctx.guild.id: vc})
 
     SRS = my_rd.StopRecordSave(os.path.join(PRIVATE_RECORD_FOLDER,str(ctx.guild.id)), name, client)
