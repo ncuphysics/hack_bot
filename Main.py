@@ -54,7 +54,6 @@ async def checkin(ctx):
         await ctx.respond(f"you didn't check out last time")
 
 
-
 @client.slash_command(name="checkout",description="check out",guild_ids=testing_guild)
 async def checkout(ctx): 
     print(f'[*] {ctx.author.name} try to check out')
@@ -96,7 +95,6 @@ async def stop_order_drink(ctx):
     await orders[ctx.author.id].on_timeout()
     await ctx.response.send_message(f"You have stop the order", ephemeral=True)
     del orders[ctx.author.id]
-
 
 @client.slash_command(name="public_record",description="Start a public record",guild_ids=testing_guild)
 async def public_record(ctx, name: Option(str, "The name of meeting", required = False, default = None)):
@@ -174,7 +172,6 @@ async def check_record_summary(ctx):
 
     await ctx.respond("Choose a record!   🟢:Public    🔴:Private", view=CRM.view, ephemeral=True)
     # await ctx.respond("====== check_record ======")
-
 
 @client.slash_command(name="check_record_file",description="Check record file",guild_ids=testing_guild)
 async def check_record_file(ctx):
@@ -355,8 +352,6 @@ async def skip(ctx):
     else:
         await ctx.send("I'm not singing")
 
-
-
 @client.slash_command(name="loop",description="loop the music list",guild_ids=testing_guild)
 async def loop(ctx):
     await ctx.respond('ok' )
@@ -372,8 +367,6 @@ async def loop(ctx):
         await ctx.send("I'm not singing")
         return
 #######################################################################################################################
-
-
 
 
 ##################################################### Team ############################################################
@@ -437,8 +430,8 @@ async def invite_button(ctx,  team_name: Option(str, "The team name", required =
         await ctx.respond(view=Invite_bottun)
 
 # 看 今日 check in out 紀錄
-@client.slash_command(name="get_checkinout_today",description="Get users checkin",guild_ids=testing_guild)
-async def get_checkinout_today(ctx, team_name: Option(str, "The team name", required = True)):
+@client.slash_command(name="get_checkinout_recent",description="Get users recent checkin",guild_ids=testing_guild)
+async def get_checkinout_recent(ctx, team_name: Option(str, "The team name", required = True)):
     if (team_name not in teams_dict):
         await ctx.respond("The team name is not exist.")
         return
@@ -454,19 +447,25 @@ async def get_checkinout_today(ctx, team_name: Option(str, "The team name", requ
         if (each_member.id not in User_dict):
             checkin_txt  = checkin_txt  + f"no record" + '\n'
             checkout_txt = checkout_txt + f"no record" + '\n'
-        else:
+        else:   
+            checkin_arr , checkout_arr = User_dict[each_member.id].get_user_check_in_record() , User_dict[each_member.id].get_user_check_ou_record()
+            if (len(checkin_arr)!=0 and checkin_arr[-1]):
+                checkin_txt  = checkin_txt  + f"{checkin_arr[-1].strftime('%m-%d %X')}" + '\n'
+            else:
+                checkin_txt  = checkin_txt  + f"No record" + '\n'
 
-            checkin_txt  = checkin_txt  + f"{User_dict[each_member.id].get_user_check_in_record()[-1].strftime('%m-%d %X')}" + '\n'
-            checkout_txt = checkout_txt + f"{User_dict[each_member.id].get_user_check_ou_record()[-1].strftime('%m-%d %X')}" + '\n'
+
+            if (len(checkout_arr)!=0 and checkout_arr[-1]):
+                checkout_txt  = checkout_txt + f"{checkout_arr[-1].strftime('%m-%d %X')}" + '\n'
+            else:
+                checkout_txt  = checkout_txt  + f"No record" + '\n'
+
 
     embed = discord.Embed( title="Check in out record ")
     embed.add_field(name='Members'  , value=name_txt    ,inline=True)
     embed.add_field(name='Check in' , value=checkin_txt ,inline=True)
     embed.add_field(name='Check out', value=checkout_txt,inline=True)
-
-
     await ctx.respond(embed=embed, ephemeral=True)
-
 
 
 # 看check in out 紀錄
@@ -481,32 +480,42 @@ async def get_checkinout_user(ctx,  team_name: Option(str, "The team name", requ
         await ctx.respond("Your are not the leader")
         return
 
-
-    ## check if user is any team leader
-    ## choose each team
+    CUIO = my_ts.CheckUsersInOut(teams_dict[team_name].member, User_dict)
 
 
-    await ctx.respond("====== checkin_record ======")
+    await ctx.respond("Choose member",view=CUIO.view,ephemeral=True)
+
+    # await ctx.respond("====== checkin_record ======")
 
 
 # 分派工作
-@client.slash_command(name="teamwork",description="Assign work to users",guild_ids=testing_guild)
-async def teamwork(ctx):
+@client.slash_command(name="vote",description="Assign work to users",guild_ids=testing_guild)
+async def vote(ctx, team_name: Option(str, "The team name", required = True)):  
+
+
+    if (team_name not in teams_dict):
+        await ctx.respond("The team name is not exist.")
+        return
+
+    if (ctx.author.id not in teams_dict[team_name].leader_ids or ctx.author.id not in teams_dict[team_name].member_ids):
+        await ctx.respond("Your are not the leader")
+        return
+
 
     ## check if user is any team leader
     ## choose each team
 
-    await ctx.respond("====== teamwork ======")
+    await ctx.respond("====== vote ======")
 
 
 # 問團隊隊員現在的任務
-@client.slash_command(name="member_current_tasks",description="Ask the team members about their current tasks",guild_ids=testing_guild)
-async def member_current_tasks(ctx):
+@client.slash_command(name="broadcast",description="Ask the team members about their current tasks",guild_ids=testing_guild)
+async def broadcast(ctx, team_name: Option(str, "The team name", required = True)):
 
     ## check if user is any team leader
     ## choose each team
 
-    await ctx.respond("====== member_current_tasks ======")
+    await ctx.respond("====== broadcast ======")
 
 
 @client.slash_command(name="teamkick",description="kick a member off the team",guild_ids=testing_guild)
@@ -552,24 +561,6 @@ async def weather(ctx):
     weather_Meun = my_wd.CheckWeatherMenu(city_table)
     await ctx.respond("====== weather ======", view=weather_Meun.view, ephemeral=True)
 
-
-
-# get stock
-@client.slash_command(name="stock",description="Get stock information",guild_ids=testing_guild)
-async def stock(ctx):
-
-    
-
-    await ctx.respond("====== stock ======")
-
-
-# get earthquake
-@client.slash_command(name="earthquake",description="Get earthquake information",guild_ids=testing_guild)
-async def earthquake(ctx):
-
-    
-
-    await ctx.respond("====== earthquake ======")
 
 ########################################################################################################################
 

@@ -15,6 +15,8 @@ class User:
         if (len(self.check_stack)==0) :
             await self.user_ctx.send("No check in record!!")
             self.__check_in_record.append(None)
+            self.__check_ou_record.append(this_check_time)
+            await self.user_ctx.send("you check out at "+ this_check_time.strftime("%m-%d %X"))
             return False
         else:
             this_check_time = datetime.now()
@@ -30,6 +32,8 @@ class User:
             last_time = self.check_stack.pop() 
             await self.user_ctx.send("you didn't check out last time\n"+"check in record : "+last_time.strftime("%m-%d %X"))
             self.__check_ou_record.append(None)
+            self.__check_in_record.append(this_check_time)
+            await self.user_ctx.send("you check in at "+this_check_time.strftime("%m-%d %X"))
             return False
         else:
             this_check_time  = datetime.now()
@@ -44,7 +48,7 @@ class User:
         return self.__check_in_record
 
     def get_user_check_ou_record(self):
-        return self.__check_out_record
+        return self.__check_ou_record
 
 
 
