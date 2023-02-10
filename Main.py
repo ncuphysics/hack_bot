@@ -11,6 +11,7 @@ import function.OrderDrink   as my_od # my class
 import function.MusicBot     as my_mb # my class
 import function.weather      as my_wd # my class
 import function.Record       as my_rd # my class
+import function.Covid        as my_Cd # my class
 import function.teams        as my_ts # my class
 import function.Help         as my_Hp # my class
 import function.User         as my_Us # my class
@@ -654,6 +655,11 @@ async def ChickenSoul(ctx):
 async def ask(ctx,  text      : Option(str, "Question" , required = True)):
     await ctx.respond("Let me think ...")
     await ctx.send( my_rd.prompt_openai(f'你是心靈捕手,一個團隊協作的AI,同時也是我們的私人秘書。\nQ:{text}\nA:'))
+
+@client.slash_command(name="get_covid",description="Number of confirmed cases in Taiwan",guild_ids=testing_guild)
+async def get_covid(ctx):
+    await ctx.respond(my_Cd.get_covid())
+
 
 #######################################################################################################################
 
