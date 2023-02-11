@@ -1,3 +1,8 @@
+
+![](https://img.shields.io/github/pipenv/locked/dependency-version/ncuphysics/hack_bot/py-cord)
+![](https://img.shields.io/bower/l/mi)
+
+
 # Hack bot
 Hack bot is a discord chat bot for teamwork enchancement.
 
