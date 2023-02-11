@@ -1,8 +1,9 @@
 from utils import slash_command
-import discord
+import discord, asyncio 
 from discord.commands import slash_command, Option
 from discord.ext import commands
-from utils.info import teams_dict
+from utils.info import teams_dict, alarm_arr
+import utils.Team as my_ts
 
 class Alarm(discord.ext.commands.Cog):
     def __init__(self, bot):
@@ -24,6 +25,11 @@ class Alarm(discord.ext.commands.Cog):
 
         await ctx.respond(f" BookMeeting at {month}-{day} {hour}",ephemeral=True)
 
+    
+
+def setup(bot):
+    bot.add_cog(Alarm(bot))
+
     async def loop_alarm():
         while True:
             result = False
@@ -34,6 +40,5 @@ class Alarm(discord.ext.commands.Cog):
                     break
             if (not result):
                 await asyncio.sleep(10)
-
-def setup(bot):
-    bot.add_cog(Alarm(bot))
+    
+    asyncio.get_event_loop().create_task(loop_alarm())

@@ -204,7 +204,6 @@ class AnoyOpion(discord.ui.Modal):
 
         await interaction.response.send_message(content='Successful', ephemeral=True)
 
-
 class Alarm:
     def __init__(self,member, ontime, text):
         self.member = member
@@ -253,7 +252,6 @@ class KickMember:
         self.members_ids.pop(which_chosen)
 
         await interaction.response.send(f"{self.select.values[0]} has been removed.")
-
 
 class CheckAllTeam:
     def __init__(self, name, team_dict):

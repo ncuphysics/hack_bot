@@ -3,7 +3,11 @@ import discord
 from discord.commands import slash_command, Option
 from discord.ext import commands
 
-class Not_Finished(discord.ext.commands.Cog):
+import utils.Covid as my_Cd
+import utils.Record    as  my_rd
+
+
+class Others(discord.ext.commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -29,4 +33,4 @@ class Not_Finished(discord.ext.commands.Cog):
         await ctx.respond(my_Cd.get_covid())
 
 def setup(bot):
-    bot.add_cog(Not_Finished(bot))
+    bot.add_cog(Others(bot))

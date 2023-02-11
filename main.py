@@ -31,4 +31,9 @@ if __name__ == '__main__': # import cogs from cogs folder
     # for extension in extensions:
     #     bot.load_extension(extension)
 
+
+
+
+            
+
 bot.run(token)
