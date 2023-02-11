@@ -1,6 +1,6 @@
 
 
-![image](https://docs.pycord.dev/en/stable/_images/snake.svg | width=100)
+# <p align="center"><img src="https://github.com/ncuphysics/hack_bot/blob/main/data/icon.png" width = '400' height="400" ></img> </p>
 
 # <p align="center">你的專屬團隊秘書 : 心靈捕手 Discord Bot </p>
 ![](https://img.shields.io/github/pipenv/locked/dependency-version/ncuphysics/hack_bot/py-cord)
@@ -14,7 +14,7 @@
 
 # :rocket: Getting Started
 
-This bot is develop base on [python](https://www.python.org). Python3 is require for installation and ffmpeg for audio procession. Here are the procedure to run Hack bot locally.
+* This bot is develop base on [python](https://www.python.org). Python3 is require for installation and ffmpeg for audio procession. Here are the procedure to run Hack bot locally.
 
 1. install python virtual environment
     ```shell
@@ -34,7 +34,7 @@ This bot is develop base on [python](https://www.python.org). Python3 is require
     python3 main.py
 
 # :computer: Cloud Hosted
-running on google cloud
+* running on google cloud
  
  
  
