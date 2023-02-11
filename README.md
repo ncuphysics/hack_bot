@@ -40,6 +40,19 @@ running on google cloud
  
  # <p align="center"> :sparkles: Features :sparkles: </p>
 
+# :office: Team manangment
+* Team daily commands.  
+Commands: `/checkin` `/checkout`  
+* Team member commands.  
+Commands: `/create_team`, `/set_public`, `/set_confirm`,`/get_checkinout_recent`,`/get_checkinout_user`,`/invite_button`,`/broadcast`,`/teamkick`,`/anonymous_opinion`,`/quit`,`/ShowTeams`,`/team_alarm`
+
+# :bike: Daily server
+* Order dranks, weather, covid news, traffic ticket  
+Commands: `/order_drink`, `/weather`, `/get_covid`...
+
+# :laughing:  Have fun
+* Joke generator, Play music, Chick soup generator, ask  
+Commands: `/joke`, `/play`, `/ChickenSoul`, `/ask`...
 
 
 
